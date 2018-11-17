@@ -57,3 +57,5 @@ almanac = almanac[indx]
 almanac['night'] = np.arange(almanac['night'].size)
 
 np.savez('almanac.npz', almanac=almanac)
+
+# runs in real    193m21.246s

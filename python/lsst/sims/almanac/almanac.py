@@ -9,7 +9,7 @@ __all__ = ['Almanac']
 class Almanac(object):
     """Class to load and return pre-computed information about the LSST site.
     """
-    def __init__(self, mjd0=None, kind='quadratic'):
+    def __init__(self, mjd_start=None, kind='quadratic'):
 
         # Load up the sunrise/sunset times
         package_path = os.path.join(getPackageDir('sims_almanac'),
@@ -18,8 +18,8 @@ class Almanac(object):
         self.sunsets = temp['almanac'].copy()
         temp.close()
 
-        if mjd0 is not None:
-            loc = np.searchsorted(self.sunsets['sunset'], mjd0)
+        if mjd_start is not None:
+            loc = np.searchsorted(self.sunsets['sunset'], mjd_start)
             # Set the start MJD to be night 1.
             self.sunsets['night'] -= self.sunsets['night'][loc-1]
 
@@ -50,6 +50,10 @@ class Almanac(object):
         indx = np.searchsorted(self.sunsets['sunset'], mjd) - 1
         return self.sunsets[indx]
 
+    def mjd_indx(self, mjd):
+        indx = np.searchsorted(self.sunsets['sunset'], mjd) - 1
+        return indx
+
     def get_sun_moon_positions(self, mjd):
         """
         All angles in Radians. moonPhase between 0 and 100.
@@ -61,8 +65,12 @@ class Almanac(object):
 
         longitude_calls = ['sun_az', 'moon_az', 'sun_RA', 'moon_RA']
         for key in longitude_calls:
-            result[key] = np.arctan2(self.interpolators[key+'_y'](mjd),
-                                     self.interpolators[key+'_x'](mjd)) + np.pi
+            # Need to wrap in case sent a scalar
+            temp_result = np.array([np.arctan2(self.interpolators[key+'_y'](mjd),
+                                              self.interpolators[key+'_x'](mjd))]).ravel()
+            negative_angles = np.where(temp_result < 0.)[0]
+            temp_result[negative_angles] = 2.*np.pi + temp_result[negative_angles]
+            result[key] = temp_result
 
         return result
         pass
