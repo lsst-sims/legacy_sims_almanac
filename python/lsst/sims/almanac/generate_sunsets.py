@@ -28,7 +28,7 @@ for i, mjds in enumerate(mjds_list):
     print('chunk %i of %i'%(i, len(mjds_list)))
     times = Time(mjds, format='mjd')
     print('getting sunsets')
-    sunsets = observer.sun_set_time(times)
+    sunsets = observer.sun_set_time(times, which='nearest')
 
     sunsets = np.unique(np.round(sunsets.mjd, decimals=4))
 
@@ -41,14 +41,14 @@ for i, mjds in enumerate(mjds_list):
 
     times = Time(sunsets, format='mjd')
     print('evening twilight 1')
-    almanac['sun_n12_setting'] = observer.twilight_evening_nautical(times).mjd
-    almanac['sun_n18_setting'] = observer.twilight_evening_astronomical(times).mjd
-    almanac['sun_n18_rising'] = observer.twilight_morning_astronomical(times).mjd
-    almanac['sun_n12_rising'] = observer.twilight_morning_nautical(times).mjd
-    almanac['sunrise'] = observer.sun_rise_time(times).mjd
-    almanac['moonset'] = observer.moon_set_time(times).mjd
+    almanac['sun_n12_setting'] = observer.twilight_evening_nautical(times, which='next').mjd
+    almanac['sun_n18_setting'] = observer.twilight_evening_astronomical(times, which='next').mjd
+    almanac['sun_n18_rising'] = observer.twilight_morning_astronomical(times, which='next').mjd
+    almanac['sun_n12_rising'] = observer.twilight_morning_nautical(times, which='next').mjd
+    almanac['sunrise'] = observer.sun_rise_time(times, which='next').mjd
+    almanac['moonset'] = observer.moon_set_time(times, which='next').mjd
     print('moonrise')
-    almanac['moonrise'] = observer.moon_rise_time(times).mjd
+    almanac['moonrise'] = observer.moon_rise_time(times, which='next').mjd
     results.append(almanac)
 
 almanac = np.concatenate(results)
@@ -56,6 +56,6 @@ umjds, indx = np.unique(almanac['sunset'], return_index=True)
 almanac = almanac[indx]
 almanac['night'] = np.arange(almanac['night'].size)
 
-np.savez('almanac.npz', almanac=almanac)
+np.savez('sunsets.npz', almanac=almanac)
 
 # runs in real    193m21.246s
