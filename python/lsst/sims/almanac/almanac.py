@@ -42,6 +42,32 @@ class Almanac(object):
                               'moon_dec': interp1d(self.sun_moon['mjd'], self.sun_moon['moon_dec'], kind=kind),
                               'moon_phase': interp1d(self.sun_moon['mjd'], self.sun_moon['moon_phase'], kind=kind)}
 
+        temp = np.load(os.path.join(package_path, 'planet_locations.npz'))
+        self.planet_loc = temp['planet_loc'].copy()
+        temp.close()
+
+        self.planet_names = ['venus', 'mars', 'jupiter', 'saturn']
+        self.planet_interpolators = {}
+        for pn in self.planet_names:
+            self.planet_interpolators[pn+'_RA_x'] = interp1d(self.planet_loc['mjd'],
+                                                             np.cos(self.planet_loc[pn+'_RA']), kind=kind)
+            self.planet_interpolators[pn+'_RA_y'] = interp1d(self.planet_loc['mjd'],
+                                                             np.sin(self.planet_loc[pn+'_RA']), kind=kind)
+            self.planet_interpolators[pn+'_dec'] = interp1d(self.planet_loc['mjd'],
+                                                            self.planet_loc[pn+'_dec'], kind=kind)
+
+    def get_planet_positions(self, mjd):
+        result = {}
+        for pn in self.planet_names:
+            result[pn+'_dec'] = self.planet_interpolators[pn+'_dec'](mjd)
+
+            temp_result = np.array([np.arctan2(self.planet_interpolators[pn+'_RA_y'](mjd)),
+                                   self.planet_interpolators[pn+'_RA_x'](mjd)]).ravel()
+            negative_angles = np.where(temp_result < 0.)[0]
+            temp_result[negative_angles] = 2.*np.pi + temp_result[negative_angles]
+            result[pn+'_RA'] = temp_result
+        return result
+
     def get_sunset_info(self, mjd):
         """
         Returns a numpy array with mjds for various events (sunset, moonrise, sun at -12 degrees alt, etc.).
@@ -67,10 +93,9 @@ class Almanac(object):
         for key in longitude_calls:
             # Need to wrap in case sent a scalar
             temp_result = np.array([np.arctan2(self.interpolators[key+'_y'](mjd),
-                                              self.interpolators[key+'_x'](mjd))]).ravel()
+                                               self.interpolators[key+'_x'](mjd))]).ravel()
             negative_angles = np.where(temp_result < 0.)[0]
             temp_result[negative_angles] = 2.*np.pi + temp_result[negative_angles]
             result[key] = temp_result
 
         return result
-        pass
