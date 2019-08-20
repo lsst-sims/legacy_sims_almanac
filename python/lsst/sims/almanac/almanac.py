@@ -61,8 +61,8 @@ class Almanac(object):
         for pn in self.planet_names:
             result[pn+'_dec'] = self.planet_interpolators[pn+'_dec'](mjd)
 
-            temp_result = np.array([np.arctan2(self.planet_interpolators[pn+'_RA_y'](mjd)),
-                                   self.planet_interpolators[pn+'_RA_x'](mjd)]).ravel()
+            temp_result = np.array([np.arctan2(self.planet_interpolators[pn+'_RA_y'](mjd),
+                                   self.planet_interpolators[pn+'_RA_x'](mjd))]).ravel()
             negative_angles = np.where(temp_result < 0.)[0]
             temp_result[negative_angles] = 2.*np.pi + temp_result[negative_angles]
             result[pn+'_RA'] = temp_result
