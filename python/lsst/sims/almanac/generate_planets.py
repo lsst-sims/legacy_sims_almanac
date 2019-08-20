@@ -37,7 +37,7 @@ for pn in planet_names:
     body = get_body(pn, t_sparse, location)
     body_icrs = body.icrs
     planet_loc[pn+'_RA'] = body_icrs.ra.rad
-    planet_loc[pn+'_dec'] = body_icrs.ra.rad
+    planet_loc[pn+'_dec'] = body_icrs.dec.rad
 
 # I could crop off the times when the sun is up, but meh, bits are cheap
 np.savez('planet_locations.npz', planet_loc=planet_loc)
