@@ -1,6 +1,3 @@
 setupRequired(base)
-setupRequired(numpy)
-setupRequired(astropy)
-setupRequired(scipy)
 setupRequired(utils)
 envPrepend(PYTHONPATH, ${PRODUCT_DIR}/python)
