@@ -3,7 +3,7 @@ from astroplan import Observer
 import astropy.units as u
 from astropy.time import Time
 from lsst.sims.utils import Site
-
+import sys
 
 # Trying out the astroplan sunrise/set code.
 # conda install -c astropy astroplan
@@ -16,8 +16,6 @@ site = Site('LSST')
 observer = Observer(longitude=site.longitude*u.deg, latitude=site.latitude*u.deg,
                     elevation=site.height*u.m, name="LSST")
 
-
-# This blows up if I try to do it all at once? 250 GB of memory?
 results = []
 
 mjd = mjd_start + 0
@@ -46,6 +44,11 @@ while mjd < (mjd_start+duration):
     almanac['sunrise'] = observer.sun_rise_time(times, which='next').mjd
     results.append(almanac)
     mjd = almanac['sunrise'] + t_step
+
+    progress = (mjd-mjd_start)/duration*100
+    text = "\rprogress = %.2f%%" % progress
+    sys.stdout.write(text)
+    sys.stdout.flush()
 
 
 almanac = np.concatenate(results)
