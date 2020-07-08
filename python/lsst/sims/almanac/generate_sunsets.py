@@ -8,7 +8,7 @@ from lsst.sims.utils import Site
 # Trying out the astroplan sunrise/set code.
 # conda install -c astropy astroplan
 mjd_start = 59853.5 - 3.*365.25
-duration = 177 #25.*365.25
+duration = 25.*365.25
 pad_around = 40
 t_step = 0.2
 
